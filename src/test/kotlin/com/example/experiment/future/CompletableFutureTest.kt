@@ -1,6 +1,7 @@
 package com.example.experiment.future
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
@@ -51,6 +52,49 @@ class CompletableFutureTest {
 
         // then
         assertThat(result).isEqualTo("Say Hello")
+    }
+
+    @DisplayName("supplyAsync 안에서 동시에 같은 일을 여러번 호출하면 순서대로 동작한다.")
+    @Test
+    fun multipleTasksInSupplyAsync() {
+        // given
+        val messageFuture = CompletableFuture.supplyAsync {
+            sayMessage("1")
+            sayMessage("2")
+            sayMessage("3")
+            sayMessage("4")
+            sayMessage("5")
+        }
+
+        // when
+        messageFuture.join()
+        // then
+    }
+
+    @DisplayName("supplyAsync를 여러개 만들고 각자 다른 동작을 하게 하면, 각 CompletableFuture는 비동기로 동작한다.")
+    @Test
+    fun multipleSupplyAsync() {
+        // given
+        val a = CompletableFuture.supplyAsync {
+            sayMessage("1")
+        }
+        val b = CompletableFuture.supplyAsync {
+            sayMessage("2")
+        }
+        val c = CompletableFuture.supplyAsync {
+            sayMessage("3")
+        }
+        val d = CompletableFuture.supplyAsync {
+            sayMessage("4")
+        }
+        val e = CompletableFuture.supplyAsync {
+            sayMessage("5")
+        }
+
+        // when
+        CompletableFuture.allOf(a, b, c, d, e)
+            .join()
+        // then
     }
 
     /**
